@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BotForge</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#15171c;--panel:#1d2027;--panel2:#262a33;--line:#343945;--text:#e7e9ee;--mut:#8d95a4;--acc:#5865f2;--ok:#4fae7b;--bad:#d9546a;--warn:#cf9b3f;--con:#101216;
+--sans:'Sora',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f3f4f7;--panel:#fff;--panel2:#eef0f4;--line:#d9dce4;--text:#1c1f26;--mut:#626a79}}
+:root[data-theme="light"]{--bg:#f3f4f7;--panel:#fff;--panel2:#eef0f4;--line:#d9dce4;--text:#1c1f26;--mut:#626a79}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px var(--sans);min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.app{display:grid;grid-template-columns:270px 1fr;min-height:100vh}
+aside{background:var(--panel);border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:16px;position:sticky;top:0;height:100vh}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:-.02em;padding:0 6px}
+.logo i{width:32px;height:32px;border-radius:9px;background:var(--acc);display:grid;place-items:center}
+.logo svg{width:18px;height:18px}
+.side-h{color:var(--mut);font-size:12px;padding:0 6px}
+#list{display:flex;flex-direction:column;gap:4px;overflow:auto}
+.bot{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;background:none;border:1px solid transparent;text-align:left;width:100%}
+.bot:hover{background:var(--panel2)}.bot.sel{background:var(--panel2);border-color:var(--line)}
+.bot b{display:block;font-weight:600}.bot small{color:var(--mut);font-size:12px}
+.av{width:38px;height:38px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);padding:7px;flex:none;display:grid;place-items:center}
+.bot.sel .av{background:var(--panel)}
+.av svg,.mi svg{width:100%;height:100%;display:block}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--mut);margin-left:auto;flex:none}
+.dot.online{background:var(--ok)}.dot.starting{background:var(--warn)}
+.btn{border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:9px 14px;font-weight:600}
+.btn:hover{border-color:var(--mut)}.btn:active{transform:scale(.98)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.bad{background:none;border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+main{padding:26px clamp(16px,3vw,36px);min-width:0}
+.head{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:20px}
+.head .av{width:48px;height:48px}
+.head h1{margin:0;font-size:24px;letter-spacing:-.02em}
+.pill{padding:4px 11px;border-radius:99px;font-size:12px;font-weight:600;background:var(--panel2);border:1px solid var(--line);color:var(--mut)}
+.pill.online{color:var(--ok);border-color:var(--ok)}.pill.starting{color:var(--warn);border-color:var(--warn)}
+.acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.card small{color:var(--mut);font-size:12px;overflow-wrap:anywhere}
+.card .v{font-size:22px;font-weight:700;margin:4px 0 6px;display:flex;align-items:center;gap:8px}
+.card .mi{width:24px;height:24px}
+.card svg.sp{width:100%;height:36px;display:block}
+.empty{text-align:center;padding:50px 20px;max-width:560px;margin:40px auto}
+.empty code{background:var(--panel2);padding:2px 7px;border-radius:6px;font-family:var(--mono)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:10px 16px;color:var(--mut);font-weight:600;white-space:nowrap}
+.tab.on{color:var(--text);border-color:var(--acc)}
+.con{background:var(--con);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+#log{height:390px;overflow:auto;padding:14px;font:13px/1.65 var(--mono);color:#cfd3dc;overflow-wrap:anywhere}
+.l-t{color:#6b7280;margin-right:8px}.l-info{color:#7fa8e8}.l-ok{color:#6cc596}.l-warn{color:#d8ad5a}.l-err{color:#e2707f}
+.cin{display:flex;border-top:1px solid var(--line)}
+.cin span{padding:12px 0 12px 14px;color:var(--mut);font-family:var(--mono)}
+.cin input{flex:1;background:none;border:0;color:#fff;font:13px var(--mono);padding:12px;outline:none;min-width:0}
+.files{display:grid;grid-template-columns:200px 1fr;gap:14px}
+.flist{display:flex;flex-direction:column;gap:4px}
+.f{background:none;border:0;text-align:left;padding:9px 12px;border-radius:8px;font:13px var(--mono);color:var(--mut)}
+.f.on,.f:hover{background:var(--panel2);color:var(--text)}
+textarea{width:100%;min-height:340px;background:var(--con);color:#cfd3dc;border:1px solid var(--line);border-radius:12px;padding:14px;font:13px/1.6 var(--mono);resize:vertical}
+input.t{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:10px;color:var(--text);font:13px var(--mono);min-width:0;width:100%}
+.row{display:grid;grid-template-columns:1fr 1.4fr auto auto;gap:8px;margin-bottom:8px}
+.set{display:grid;gap:14px;max-width:520px}
+.set label{display:grid;gap:6px;color:var(--mut);font-size:12px}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:22px;width:min(420px,92vw)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+dialog h3{margin:0 0 14px}
+.langs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.lb{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;font-weight:600}
+.lb .mi{width:40px;height:40px}.lb.on{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
+.dact{display:flex;justify-content:flex-end;gap:8px}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:10px;font-weight:600;opacity:0;pointer-events:none;transition:.2s;max-width:90vw}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#auth{position:fixed;inset:0;z-index:20;background:var(--bg);display:grid;grid-template-columns:1.1fr 1fr;overflow:auto;padding-top:env(safe-area-inset-top,0px)}
+#auth[hidden]{display:none}
+.hero{background:var(--panel);border-right:1px solid var(--line);padding:48px clamp(24px,5vw,72px);display:flex;flex-direction:column;justify-content:center;gap:22px}
+.hero h2{font-size:clamp(28px,4vw,44px);letter-spacing:-.03em;line-height:1.1;margin:0;max-width:520px}
+.hero p{color:var(--mut);max-width:440px;line-height:1.6;margin:0}
+.hero .logo{padding:0;margin-bottom:10px}
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);padding:8px 14px;border-radius:99px;font-weight:600}
+.chip .mi{width:22px;height:22px}
+.pv{max-width:460px}.pv div div{font:12.5px/1.7 var(--mono);color:#cfd3dc}.pv>div{padding:14px}
+.form{display:flex;flex-direction:column;justify-content:center;padding:40px clamp(24px,6vw,80px);width:100%;max-width:540px;margin:auto}
+.form h3{font-size:24px;letter-spacing:-.02em;margin:0 0 18px}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px;margin-bottom:24px}
+.seg button{background:none;border:0;padding:9px;border-radius:8px;font-weight:600;color:var(--mut)}
+.seg button.on{background:var(--panel);color:var(--text);box-shadow:0 0 0 1px var(--line)}
+.form label{display:grid;gap:6px;color:var(--mut);font-size:12px;margin-bottom:14px}
+.err{color:var(--bad);min-height:20px;font-size:13px;margin:0 0 6px}
+.form details{margin-top:22px;color:var(--mut);font-size:12px}.form details input{margin:8px 0}
+.me{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:14px;color:var(--mut);font-weight:600}
+@media(max-width:820px){#auth{grid-template-columns:1fr}.hero{border-right:0;border-bottom:1px solid var(--line);padding:26px 24px}.pv,.hero p{display:none}.app{grid-template-columns:1fr}
+aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+#list{flex-direction:row;overflow-x:auto}.bot{min-width:190px}
+.files{grid-template-columns:1fr}.flist{flex-direction:row;overflow-x:auto}
+.row{grid-template-columns:1fr 1fr}.acts{margin-left:0}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <div class="logo"><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3 3 8l9 5 9-5z"/><path d="m3 13 9 5 9-5"/><path d="m3 17.5 9 5 9-5" opacity=".55"/></svg></i>BotForge</div>
+  <div class="side-h">Your bots</div>
+  <div id="list"></div>
+  <button class="btn pri" id="add">New bot</button>
+  <div class="me"><span id="who"></span><button class="btn" id="out">Sign out</button></div>
+</aside>
+<main id="main"></main>
+</div>
+<dialog id="dlg"><h3>New bot</h3>
+  <input class="t" id="nn" placeholder="Bot name" aria-label="Bot name">
+  <div class="langs" id="lg"></div>
+  <div class="dact"><button class="btn" id="dc">Cancel</button><button class="btn pri" id="dk">Create bot</button></div>
+</dialog>
+<div id="toast"></div>
+<div id="auth" hidden>
+  <section class="hero">
+    <h2>Host your Discord bot and keep it online.</h2>
+    <p>Add your code and token, press Start. Live logs, a file editor and simple controls for Node.js and Python bots.</p>
+    <div class="chips" id="chips"></div>
+    <div class="con pv"><div>
+      <div><span class="l-t">12:01:07</span><span class="l-info">$ node index.js</span></div>
+      <div><span class="l-t">12:01:09</span><span class="l-ok">Logged in as Nova#0001</span></div>
+      <div><span class="l-t">12:03:41</span><span>Slash command /ping used</span></div>
+    </div></div>
+  </section>
+  <section class="form">
+    <div class="seg"><button id="m-in" class="on">Sign in</button><button id="m-up">Sign up</button></div>
+    <h3 id="ft">Welcome back</h3>
+    <label>Username<input class="t" id="au" autocomplete="username"></label>
+    <label>Password<input class="t" id="ap" type="password" autocomplete="current-password"></label>
+    <p class="err" id="ae" role="alert"></p>
+    <button class="btn pri" id="asub">Sign in</button>
+    <details><summary>Host server address</summary><input class="t" id="ah" placeholder="https://bots.example.com" aria-label="Host server address"><span>Leave empty if this page is served by your server.</span></details>
+  </section>
+</div>
+<script>
+const $=s=>document.querySelector(s),N=30;
+const IC={
+'Node.js':'<svg viewBox="0 0 128 128"><path fill="#539e43" d="M64 6 114 35v58L64 122 14 93V35z"/><text x="64" y="77" font-size="36" font-weight="700" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif">JS</text></svg>',
+Python:'<svg viewBox="0 0 128 128"><path fill="#3776ab" d="M63.391 1.988c-4.222.02-8.252.379-11.8 1.007-10.45 1.846-12.346 5.71-12.346 12.837v9.411h24.693v3.137H29.977c-7.176 0-13.46 4.313-15.426 12.521-2.268 9.405-2.368 15.275 0 25.096 1.755 7.311 5.947 12.519 13.124 12.519h8.491V67.234c0-8.151 7.051-15.34 15.426-15.34h24.665c6.866 0 12.346-5.654 12.346-12.548V15.833c0-6.693-5.646-11.72-12.346-12.837-4.244-.706-8.645-1.027-12.866-1.008zM50.037 9.557c2.55 0 4.634 2.117 4.634 4.721 0 2.593-2.083 4.69-4.634 4.69-2.56 0-4.633-2.097-4.633-4.69-.001-2.604 2.073-4.721 4.633-4.721z"/><path fill="#ffd43b" d="M91.682 28.38v10.966c0 8.5-7.208 15.655-15.426 15.655H51.591c-6.756 0-12.346 5.783-12.346 12.549v23.515c0 6.691 5.818 10.628 12.346 12.547 7.816 2.297 15.312 2.713 24.665 0 6.216-1.801 12.346-5.423 12.346-12.547v-9.412H63.938v-3.138h37.012c7.176 0 9.852-5.005 12.348-12.519 2.578-7.735 2.467-15.174 0-25.096-1.774-7.145-5.161-12.521-12.348-12.521h-9.268zM77.809 87.927c2.561 0 4.634 2.097 4.634 4.692 0 2.602-2.074 4.719-4.634 4.719-2.55 0-4.633-2.117-4.633-4.719 0-2.595 2.083-4.692 4.633-4.692z"/></svg>'};
+const ls={get:k=>{try{return localStorage.getItem(k)||''}catch{return''}},set:(k,v)=>{try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch{}}};
+let host=ls.get('bf_host'),token=ls.get('bf_token'),user=ls.get('bf_user'),mode='in',poll;
+let bots=[],sel=0,tab='console',es,fl={},file='',nl='Node.js',bad=false,want='',lastKey='';
+const B=()=>bots[sel];
+const api=async(m,u,b)=>{const r=await fetch(host+'/api'+u,{method:m,headers:{'content-type':'application/json',...(token?{authorization:'Bearer '+token}:{})},body:b?JSON.stringify(b):undefined});const d=await r.json().catch(()=>({}));if(r.status===401&&token)logout();if(!r.ok)throw new Error(d.error||r.statusText);return d};
+const run=f=>async(...a)=>{try{await f(...a)}catch(x){toast(x.message)}};
+const pad=a=>Array(Math.max(0,N-a.length)).fill(0).concat(a.slice(-N));
+const up=b=>{if(!b.start)return'—';const s=(Date.now()-b.start)/1000|0;return`${s/3600|0}h ${s%3600/60|0}m ${s%60}s`};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200)}
+const line=x=>`<div><span class="l-t">${x.t}</span><span class="l-${x.l}">${esc(x.m)}</span></div>`;
+function appendLog(x){const e=$('#log');if(!e)return;const ph=$('#ph');if(ph)ph.remove();const stick=e.scrollTop+e.clientHeight>=e.scrollHeight-40;e.insertAdjacentHTML('beforeend',line(x));if(stick)e.scrollTop=e.scrollHeight}
+function spark(a,max){const p=pad(a).map((v,i)=>`${i*(200/(N-1))},${36-Math.min(v/max,1)*32}`).join(' ');return`<svg class="sp" viewBox="0 0 200 36" preserveAspectRatio="none"><polyline points="${p}" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linejoin="round"/></svg>`}
+function list(){$('#list').innerHTML=bots.map((b,i)=>`<button class="bot ${i===sel?'sel':''}" data-i="${i}"><span class="av">${IC[b.lang]}</span><span><b>${esc(b.name)}</b><small>${b.lang}</small></span><span class="dot ${b.status}"></span></button>`).join('')}
+function stats(){const b=B(),on=b.status==='online',c=b.cpu[b.cpu.length-1]||0,m=b.ram[b.ram.length-1]||0;
+$('#stats').innerHTML=`<div class="card"><small>CPU</small><div class="v">${on?c:0}%</div>${spark(b.cpu,Math.max(20,...b.cpu))}</div>
+<div class="card"><small>Memory</small><div class="v">${on?m:0} MB</div>${spark(b.ram,Math.max(64,...b.ram))}</div>
+<div class="card"><small>Uptime</small><div class="v">${on?up(b):'—'}</div><small>${on?'Running':b.status==='starting'?'Installing dependencies':'Stopped'}</small></div>
+<div class="card"><small>Runtime</small><div class="v"><span class="mi">${IC[b.lang]}</span>${b.lang}</div><small>${esc(b.cmd)}</small></div>`;
+const s=$('#stt');s.className='pill '+b.status;s.textContent=b.status[0].toUpperCase()+b.status.slice(1);
+$('#go').disabled=b.status!=='offline';$('#rs').disabled=b.status==='starting';$('#st').disabled=b.status==='offline';list()}
+async function view(){const b=B();if(!b)return;let h='';
+if(tab==='console')h=`<div class="con"><div id="log">${b.logs.length?b.logs.map(line).join(''):'<div id="ph" class="l-warn">Nothing running. Press Start to launch this bot.</div>'}</div><div class="cin"><span>&gt;</span><input id="cmd" placeholder="Send input to the running process" autocomplete="off" aria-label="Console input"></div></div>`;
+if(tab==='files'){try{fl=await api('GET','/bots/'+b.id+'/files')}catch{fl={}}if(!fl[file])file=Object.keys(fl)[0]||'';
+h=`<div class="files"><div class="flist">${Object.keys(fl).map(f=>`<button class="f ${f===file?'on':''}" data-f="${esc(f)}">${esc(f)}</button>`).join('')}<button class="f" id="nf">+ New file</button></div><div><textarea id="ed" spellcheck="false" aria-label="File editor">${esc(fl[file]||'')}</textarea><p><button class="btn pri" id="sv">Save file</button></p></div></div>`}
+if(tab==='vars')h=`${b.env.map((e,i)=>`<div class="row"><input class="t" value="${esc(e.k)}" data-k="${i}" aria-label="Name"><input class="t" type="${e.h?'password':'text'}" value="${esc(e.v)}" data-v="${i}" aria-label="Value"><button class="btn" data-h="${i}">${e.h?'Show':'Hide'}</button><button class="btn bad" data-d="${i}">Remove</button></div>`).join('')}<p><button class="btn" id="av">Add variable</button> <button class="btn pri" id="sve">Save variables</button></p><small style="color:var(--mut)">Paste your bot token into TOKEN. Restart the bot after saving.</small>`;
+if(tab==='set')h=`<div class="set"><label>Bot name<input class="t" id="sn" value="${esc(b.name)}"></label><label>Start command<input class="t" id="sc" value="${esc(b.cmd)}"></label><button class="btn pri" id="ss">Save settings</button><button class="btn bad" id="del">Delete bot</button></div>`;
+$('#body').innerHTML=h;const l=$('#log');if(l)l.scrollTop=l.scrollHeight}
+function shell(){list();const m=$('#main');
+if(bad)return m.innerHTML='<div class="card empty"><h2>Can’t reach the host</h2><p>Start the server with <code>node server.js</code> and open the address it prints.</p></div>';
+if(!bots.length)return m.innerHTML='<div class="card empty"><h2>No bots yet</h2><p>Create a Node.js or Python bot to get started.</p><button class="btn pri" id="add2">New bot</button></div>';
+const b=B();m.innerHTML=`<div class="head"><span class="av">${IC[b.lang]}</span><h1>${esc(b.name)}</h1><span class="pill" id="stt"></span>
+<div class="acts"><button class="btn ok" id="go">Start</button><button class="btn" id="rs">Restart</button><button class="btn bad" id="st">Stop</button></div></div>
+<div class="stats" id="stats"></div>
+<div class="tabs">${[['console','Console'],['files','Files'],['vars','Variables'],['set','Settings']].map(t=>`<button class="tab ${tab===t[0]?'on':''}" data-t="${t[0]}">${t[1]}</button>`).join('')}</div><div id="body"></div>`;stats();view()}
+function watch(){if(es)es.close();const b=B();if(!b||bad)return;b.logs=[];es=new EventSource(host+'/api/bots/'+b.id+'/logs?token='+encodeURIComponent(token));es.onmessage=e=>{const x=JSON.parse(e.data);b.logs.push(x);if(tab==='console')appendLog(x)}}
+async function refresh(){if(!token)return;try{const d=await api('GET','/bots');bad=false;const old=Object.fromEntries(bots.map(b=>[b.id,b])),cur=B()&&B().id;
+bots=d.map(s=>{const o=old[s.id];if(!o)return{...s,logs:[]};Object.assign(o,{status:s.status,start:s.start,cpu:s.cpu,ram:s.ram});return o});
+sel=Math.max(0,bots.findIndex(b=>b.id===(want||cur)));want=''}catch{bad=true}
+const key=bad+','+bots.map(b=>b.id).join()+sel;if(key!==lastKey){lastKey=key;shell();watch()}else if(bots.length)stats()}
+function syncEnv(){document.querySelectorAll('[data-k]').forEach(i=>B().env[i.dataset.k].k=i.value);document.querySelectorAll('[data-v]').forEach(i=>B().env[i.dataset.v].v=i.value)}
+function langs(){$('#lg').innerHTML=Object.keys(IC).map(l=>`<button class="lb ${l===nl?'on':''}" data-l="${l}"><span class="mi">${IC[l]}</span>${l}</button>`).join('')}
+document.addEventListener('click',run(async e=>{const c=e.target.closest('button');if(!c)return;const b=B(),id=c.id;
+if(id==='m-in')return setMode('in');if(id==='m-up')return setMode('up');if(id==='asub')return submit();if(id==='out')return logout();
+if(c.dataset.i){sel=+c.dataset.i;tab='console';return refresh()}
+if(c.dataset.t){tab=c.dataset.t;return shell()}
+if(c.dataset.f){file=c.dataset.f;return view()}
+if(c.dataset.l){nl=c.dataset.l;return langs()}
+if(c.dataset.h!==undefined){syncEnv();b.env[c.dataset.h].h=!b.env[c.dataset.h].h;return view()}
+if(c.dataset.d!==undefined){syncEnv();b.env.splice(c.dataset.d,1);return view()}
+if(id==='add'||id==='add2'){langs();$('#dlg').showModal();return}
+if(id==='dc')return $('#dlg').close();
+if(id==='dk'){const r=await api('POST','/bots',{name:$('#nn').value.trim()||'My bot',lang:nl});$('#dlg').close();$('#nn').value='';want=r.id;tab='console';return refresh()}
+if(id==='go'){await api('POST','/bots/'+b.id+'/start');return refresh()}
+if(id==='st'){await api('POST','/bots/'+b.id+'/stop');return refresh()}
+if(id==='rs'){await api('POST','/bots/'+b.id+'/restart');return refresh()}
+if(id==='sv'){await api('PUT',`/bots/${b.id}/files/${file}`,{content:$('#ed').value});return toast('Saved '+file)}
+if(id==='nf'){const n=prompt('New file name');if(!n)return;await api('PUT',`/bots/${b.id}/files/${n}`,{content:''});file=n;return view()}
+if(id==='av'){syncEnv();b.env.push({k:'',v:'',h:false});return view()}
+if(id==='sve'){syncEnv();await api('PATCH','/bots/'+b.id,{env:b.env.filter(e=>e.k)});return toast('Saved. Restart the bot to apply.')}
+if(id==='ss'){const d=await api('PATCH','/bots/'+b.id,{name:$('#sn').value,cmd:$('#sc').value});b.name=d.name;b.cmd=d.cmd;toast('Settings saved');return shell()}
+if(id==='del'){if(!confirm('Delete '+b.name+' and all its files?'))return;await api('DELETE','/bots/'+b.id);return refresh()}
+}));
+document.addEventListener('keydown',run(async e=>{if(e.target.id!=='cmd'||e.key!=='Enter')return;const v=e.target.value.trim();e.target.value='';if(!v)return;
+if(v==='clear'){B().logs=[];return view()}await api('POST',`/bots/${B().id}/stdin`,{line:v})}));
+function showAuth(){$('#auth').hidden=false;$('#ah').value=host;$('#chips').innerHTML=Object.keys(IC).map(l=>`<span class="chip"><span class="mi">${IC[l]}</span>${l}</span>`).join('');if(!$('.hero .logo'))$('.hero').prepend($('aside .logo').cloneNode(true));setMode(mode)}
+function setMode(m){mode=m;$('#m-in').classList.toggle('on',m==='in');$('#m-up').classList.toggle('on',m==='up');$('#ft').textContent=m==='in'?'Welcome back':'Create your account';$('#asub').textContent=m==='in'?'Sign in':'Create account';$('#ap').autocomplete=m==='in'?'current-password':'new-password';$('#ae').textContent=''}
+async function submit(){host=$('#ah').value.trim().replace(/\/+$/,'');ls.set('bf_host',host);$('#ae').textContent='';
+try{const d=await api('POST',mode==='in'?'/login':'/signup',{username:$('#au').value.trim(),password:$('#ap').value});token=d.token;user=d.user;ls.set('bf_token',token);ls.set('bf_user',user);$('#ap').value='';enter()}
+catch(x){$('#ae').textContent=x.message==='Failed to fetch'?'Can’t reach the server. Check the host server address below.':x.message}}
+function enter(){$('#auth').hidden=true;$('#who').textContent=user;lastKey='';bots=[];bad=false;refresh();clearInterval(poll);poll=setInterval(refresh,2000)}
+function logout(){token='';user='';ls.set('bf_token','');ls.set('bf_user','');clearInterval(poll);if(es)es.close();bots=[];lastKey='';showAuth()}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='ap'||e.target.id==='au'))submit()});
+token?enter():showAuth();
+</script>
+</body>
+</html>
